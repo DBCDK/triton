@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
 @Path("scan")
 public class ScanBean {
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response scan() {
         // TODO: 15-01-18 replace with actual scan
         final NamedList<Number> entries = new NamedList<>();

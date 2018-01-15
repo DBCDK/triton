@@ -35,6 +35,7 @@ public class Triton extends Application {
     @Override
     public Set<Object> getSingletons() {
         final Set<Object> singletons = new HashSet<>();
+        singletons.add(new JsonMapperProvider());
         singletons.add(new XmlMapperProvider());
         return singletons;
     }
