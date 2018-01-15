@@ -20,14 +20,22 @@
   </repositories>
 
   <properties>
+    <jackson.version>2.9.2</jackson.version>
     <javaee.api.version>7.0</javaee.api.version>
     <jdk.target.version>1.8</jdk.target.version>
+    <jersey.version>2.22.2</jersey.version>
     <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
     <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
     <serviceutils.version>0.1-SNAPSHOT</serviceutils.version>
+    <solr-api.version>1.0-SNAPSHOT</solr-api.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-xml-provider</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
     <dependency>
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
@@ -35,9 +43,20 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>${jersey.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>dk.dbc</groupId>
       <artifactId>serviceutils</artifactId>
       <version>${serviceutils.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dk.dbc</groupId>
+      <artifactId>solr-api</artifactId>
+      <version>${solr-api.version}</version>
     </dependency>
   </dependencies>
 

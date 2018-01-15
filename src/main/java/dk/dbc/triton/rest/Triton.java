@@ -5,6 +5,9 @@
 
 package dk.dbc.triton.rest;
 
+import com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider;
+import org.glassfish.jersey.jackson.JacksonFeature;
+
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
@@ -18,11 +21,21 @@ import java.util.Set;
 public class Triton extends Application {
     public static final Set<Class<?>> classes = new HashSet<>();
     static {
+        classes.add(JacksonFeature.class);
+        classes.add(JacksonXMLProvider.class);
+        classes.add(ScanBean.class);
         classes.add(StatusBean.class);
     }
 
     @Override
     public Set<Class<?>> getClasses() {
         return classes;
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
+        final Set<Object> singletons = new HashSet<>();
+        singletons.add(new XmlMapperProvider());
+        return singletons;
     }
 }
