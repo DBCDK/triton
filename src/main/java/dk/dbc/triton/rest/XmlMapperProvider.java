@@ -22,7 +22,7 @@ public class XmlMapperProvider implements ContextResolver<XmlMapper> {
 
     public XmlMapperProvider() {
         final JacksonXmlModule module = new JacksonXmlModule();
-        module.setDefaultUseWrapper(false);
+        module.setDefaultUseWrapper(true);
         xmlMapper = new XmlMapper(module);
         xmlMapper.configure(SerializationFeature.INDENT_OUTPUT, true)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)

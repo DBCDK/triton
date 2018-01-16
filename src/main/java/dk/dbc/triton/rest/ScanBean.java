@@ -6,6 +6,7 @@
 package dk.dbc.triton.rest;
 
 import dk.dbc.triton.core.ScanPos;
+import dk.dbc.triton.core.ScanResult;
 import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.common.util.NamedList;
 
@@ -45,7 +46,7 @@ public class ScanBean {
         entries.add("c", 3);
         final NamedList<NamedList<Number>> fieldTerms = new NamedList<>();
         fieldTerms.add("author", entries);
-        final TermsResponse scanResult = new TermsResponse(fieldTerms);
+        final ScanResult scanResult = ScanResult.of(new TermsResponse(fieldTerms));
 
         return Response.ok(scanResult).build();
     }

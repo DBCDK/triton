@@ -1,0 +1,13 @@
+{
+  "index" : "author",
+  "terms" : [ {
+    "value" : "a",
+    "frequency" : 1
+  }, {
+    "value" : "b",
+    "frequency" : 2
+  }, {
+    "value" : "c",
+    "frequency" : 3
+  } ]
+}
