@@ -29,6 +29,7 @@
     <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
     <maven.surefire.version>2.19</maven.surefire.version>
     <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
+    <mockito.version>2.12.0</mockito.version>
     <serviceutils.version>0.1-SNAPSHOT</serviceutils.version>
     <slf4j.version>1.7.25</slf4j.version>
     <solr-api.version>1.0-SNAPSHOT</solr-api.version>
@@ -68,6 +69,18 @@
       <artifactId>hamcrest-core</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dk.dbc</groupId>

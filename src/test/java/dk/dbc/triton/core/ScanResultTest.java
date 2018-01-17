@@ -24,7 +24,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ScanResultTest {
+public class ScanResultTest {
+    public static TermsResponse createTermsResponse(String... indexes) {
+        final NamedList<Number> indexTerms = new NamedList<>();
+        indexTerms.add("a", 1);
+        indexTerms.add("b", 2);
+        indexTerms.add("c", 3);
+        final NamedList<NamedList<Number>> list = new NamedList<>();
+        for (String index : indexes) {
+            list.add(index, indexTerms);
+        }
+        return new TermsResponse(list);
+    }
+
     @Test
     void throwsOnNullTermsResponse() {
         assertThrows(NullPointerException.class, () -> ScanResult.of(null));
@@ -67,18 +79,6 @@ class ScanResultTest {
                 readResource("src/test/resources/scanresult.json"),
                 StandardCharsets.UTF_8);
         assertThat(stringWriter.toString(), is(expected));
-    }
-
-    private TermsResponse createTermsResponse(String... indexes) {
-        final NamedList<Number> indexTerms = new NamedList<>();
-        indexTerms.add("a", 1);
-        indexTerms.add("b", 2);
-        indexTerms.add("c", 3);
-        final NamedList<NamedList<Number>> list = new NamedList<>();
-        for (String index : indexes) {
-            list.add(index, indexTerms);
-        }
-        return new TermsResponse(list);
     }
 
     private byte[] readResource(String resource) {
