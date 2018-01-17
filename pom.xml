@@ -30,6 +30,7 @@
     <maven.surefire.version>2.19</maven.surefire.version>
     <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
     <serviceutils.version>0.1-SNAPSHOT</serviceutils.version>
+    <slf4j.version>1.7.25</slf4j.version>
     <solr-api.version>1.0-SNAPSHOT</solr-api.version>
   </properties>
 
@@ -72,6 +73,16 @@
       <groupId>dk.dbc</groupId>
       <artifactId>serviceutils</artifactId>
       <version>${serviceutils.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>dk.dbc</groupId>

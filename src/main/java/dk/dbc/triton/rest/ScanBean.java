@@ -7,9 +7,11 @@ package dk.dbc.triton.rest;
 
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
+import dk.dbc.triton.core.SolrClientFactoryBean;
 import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.common.util.NamedList;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -22,6 +24,8 @@ import javax.ws.rs.core.Response;
 @Stateless
 @Path("scan")
 public class ScanBean {
+    @EJB SolrClientFactoryBean solrClientFactoryBean;
+
     /**
      * Scans database index for a term or a phrase
      * @param term index term
@@ -39,6 +43,7 @@ public class ScanBean {
             @QueryParam("pos") @DefaultValue("first") ScanPos pos,
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("include") @DefaultValue("") String include) {
+        solrClientFactoryBean.getCloudSolrClient();
         // TODO: 15-01-18 replace with actual scan
         final NamedList<Number> entries = new NamedList<>();
         entries.add("a", 1);
