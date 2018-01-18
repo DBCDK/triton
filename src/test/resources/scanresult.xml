@@ -1,0 +1,17 @@
+<ScanResult>
+  <index>author</index>
+  <terms>
+    <term>
+      <value>a</value>
+      <frequency>1</frequency>
+    </term>
+    <term>
+      <value>b</value>
+      <frequency>2</frequency>
+    </term>
+    <term>
+      <value>c</value>
+      <frequency>3</frequency>
+    </term>
+  </terms>
+</ScanResult>
