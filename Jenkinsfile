@@ -45,25 +45,25 @@ pipeline {
 			}
 		}
 		stage("warnings") {
-            agent {label workerNode}
-            steps {
-                warnings consoleParsers: [
-                    [parserName: "Java Compiler (javac)"],
-                    [parserName: "JavaDoc Tool"]
-                ],
-                unstableTotalAll: "0",
-                failedTotalAll: "0"
-            }
-        }
-        stage("pmd") {
-            agent {label workerNode}
-            steps {
-                step([$class: 'hudson.plugins.pmd.PmdPublisher',
-                    pattern: '**/target/pmd.xml',
-                    unstableTotalAll: "0",
-                    failedTotalAll: "0"])
-            }
-        }
+			agent {label workerNode}
+			steps {
+				warnings consoleParsers: [
+					[parserName: "Java Compiler (javac)"],
+					[parserName: "JavaDoc Tool"]
+				],
+					unstableTotalAll: "0",
+					failedTotalAll: "0"
+			}
+		}
+		stage("pmd") {
+			agent {label workerNode}
+			steps {
+				step([$class: 'hudson.plugins.pmd.PmdPublisher',
+					  pattern: '**/target/pmd.xml',
+					  unstableTotalAll: "0",
+					  failedTotalAll: "0"])
+			}
+		}
 		stage("docker build") {
 			steps {
 				script {
