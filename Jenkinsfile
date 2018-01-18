@@ -11,7 +11,7 @@ void deploy(String deployEnvironment) {
 		. bin/activate
 		pip3 install --upgrade pip
 		pip3 install -U -e \"git+https://github.com/DBCDK/mesos-tools.git#egg=mesos-tools\"
-		marathon-config-producer deploy/marathon single triton-${deployEnvironment} --template-keys BUILD_NUMBER=${env.BUILD_NUMBER} -o triton-service-${deployEnvironment}.json
+		marathon-config-producer deploy/marathon triton-${deployEnvironment} --template-keys BUILD_NUMBER=${env.BUILD_NUMBER} -o triton-service-${deployEnvironment}.json
 		marathon-deployer -a ${MARATHON_TOKEN} -b https://mcp1.dbc.dk:8443 deploy triton-service-${deployEnvironment}.json
 	"""
 }
