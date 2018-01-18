@@ -49,7 +49,7 @@ class ScanBeanTest {
     void setupExpectations() {
         when(solrClientFactoryBean.getCloudSolrClient()).thenReturn(cloudSolrClient);
         when(solrScan.withField(INDEX)).thenReturn(solrScan);
-        when(solrScan.withMaxCount(SIZE)).thenReturn(solrScan);
+        when(solrScan.withLimit(SIZE)).thenReturn(solrScan);
         when(solrScan.withLower(TERM)).thenReturn(solrScan);
         when(solrScan.withLowerInclusive(true)).thenReturn(solrScan);
         when(solrScan.withUpper(TERM)).thenReturn(solrScan);
@@ -123,7 +123,7 @@ class ScanBeanTest {
                 is(Response.Status.OK.getStatusCode()));
 
         verify(solrScan).withField(INDEX);
-        verify(solrScan).withMaxCount(SIZE);
+        verify(solrScan).withLimit(SIZE);
         verify(solrScan).withLower(TERM);
         verify(solrScan).withLowerInclusive(true);
         verify(solrScan).withRegex(INCLUDE);

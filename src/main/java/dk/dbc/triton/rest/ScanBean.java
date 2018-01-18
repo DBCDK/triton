@@ -63,7 +63,7 @@ public class ScanBean {
             final CloudSolrClient cloudSolrClient = solrClientFactoryBean.getCloudSolrClient();
             final SolrScan solrScan = createSolrScan(cloudSolrClient, collection)
                     .withField(index)
-                    .withMaxCount(size);
+                    .withLimit(size);
             if (pos == ScanPos.FIRST) {
                 solrScan.withLower(term).withLowerInclusive(true);
             } else {
