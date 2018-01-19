@@ -78,13 +78,14 @@ public class ScanResult {
         if (termsMap.size() > 1) {
             throw new IllegalArgumentException("Multiple indexes in TermsResponse");
         }
-        return termsMap.entrySet().stream()
+        final ScanResult scanResult = termsMap.entrySet().stream()
                 .findFirst()
                 .map(entry -> new ScanResult(entry.getKey(),
-                    entry.getValue().stream()
-                            .map(Term::of)
-                            .collect(Collectors.toList())))
+                        entry.getValue().stream()
+                                .map(Term::of)
+                                .collect(Collectors.toList())))
                 .orElse(EMPTY);
+        return scanResult;
     }
 
     ScanResult(String index, List<Term> terms) {
