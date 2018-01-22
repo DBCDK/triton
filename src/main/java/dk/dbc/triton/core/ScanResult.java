@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -79,13 +78,13 @@ public class ScanResult {
         if (termsMap.size() > 1) {
             throw new IllegalArgumentException("Multiple indexes in TermsResponse");
         }
-        final Optional<Map.Entry<String, List<TermsResponse.Term>>> firstEntry =
-                termsMap.entrySet().stream().findFirst();
-        return firstEntry.map(entry -> new ScanResult(entry.getKey(),
-                        entry.getValue().stream()
+        if (termsMap.isEmpty()) {
+           return EMPTY;
+        }
+        final Map.Entry<String, List<TermsResponse.Term>> entry = termsMap.entrySet().iterator().next();
+        return new ScanResult(entry.getKey(), entry.getValue().stream()
                                 .map(Term::of)
-                                .collect(Collectors.toList())))
-                .orElse(EMPTY);
+                                .collect(Collectors.toList()));
     }
 
     ScanResult(String index, List<Term> terms) {
