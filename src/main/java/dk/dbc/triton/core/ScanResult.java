@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -73,15 +74,14 @@ public class ScanResult {
     @JacksonXmlProperty(localName = "term")
     private List<Term> terms;
 
-    @SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
     public static ScanResult of(TermsResponse termsResponse) {
         final Map<String, List<TermsResponse.Term>> termsMap = termsResponse.getTermMap();
         if (termsMap.size() > 1) {
             throw new IllegalArgumentException("Multiple indexes in TermsResponse");
         }
-        return termsMap.entrySet().stream()
-                .findFirst()
-                .map(entry -> new ScanResult(entry.getKey(),
+        final Optional<Map.Entry<String, List<TermsResponse.Term>>> firstEntry =
+                termsMap.entrySet().stream().findFirst();
+        return firstEntry.map(entry -> new ScanResult(entry.getKey(),
                         entry.getValue().stream()
                                 .map(Term::of)
                                 .collect(Collectors.toList())))
