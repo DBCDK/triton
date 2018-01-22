@@ -73,19 +73,19 @@ public class ScanResult {
     @JacksonXmlProperty(localName = "term")
     private List<Term> terms;
 
+    @SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
     public static ScanResult of(TermsResponse termsResponse) {
         final Map<String, List<TermsResponse.Term>> termsMap = termsResponse.getTermMap();
         if (termsMap.size() > 1) {
             throw new IllegalArgumentException("Multiple indexes in TermsResponse");
         }
-        final ScanResult scanResult = termsMap.entrySet().stream()
+        return termsMap.entrySet().stream()
                 .findFirst()
                 .map(entry -> new ScanResult(entry.getKey(),
                         entry.getValue().stream()
                                 .map(Term::of)
                                 .collect(Collectors.toList())))
                 .orElse(EMPTY);
-        return scanResult;
     }
 
     ScanResult(String index, List<Term> terms) {
