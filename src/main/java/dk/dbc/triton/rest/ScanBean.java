@@ -9,6 +9,7 @@ import dk.dbc.solr.SolrScan;
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.SolrClientFactoryBean;
+import dk.dbc.util.Timed;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.common.SolrException;
@@ -47,6 +48,7 @@ public class ScanBean {
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Timed
     public Response scan(
             @QueryParam("term") String term,
             @QueryParam("index") String index,
