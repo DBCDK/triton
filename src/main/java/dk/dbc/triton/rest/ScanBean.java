@@ -39,6 +39,9 @@ public class ScanBean {
      * @param pos preferred term position {first|last}, defaults to first
      * @param size maximum number of entries to be return, defaults to 20
      * @param include restricts to terms matching the regular expression
+     * @param withExactFrequency perform exact match search for each scan
+     *                           term to adjust term frequencies,
+     *                           defaults to true
      * @return 200 Ok response containing serialized {@link ScanResult}.
      *         400 Bad Request on null or empty term, index or collection param.
      *         400 Bad Request on non-existing collection.
@@ -55,7 +58,8 @@ public class ScanBean {
             @QueryParam("collection") String collection,
             @QueryParam("pos") @DefaultValue("first") ScanPos pos,
             @QueryParam("size") @DefaultValue("20") int size,
-            @QueryParam("include") @DefaultValue("") String include)
+            @QueryParam("include") @DefaultValue("") String include,
+            @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency)
             throws IOException, SolrServerException, WebApplicationException {
         verifyStringParam("term", term);
         verifyStringParam("index", index);
@@ -75,6 +79,10 @@ public class ScanBean {
                 solrScan.withRegex(include);
             }
             scanResult = ScanResult.of(solrScan.execute());
+
+            if (withExactFrequency) {
+                // TODO: 24-01-18 adjust term frequencies
+            }
         } catch (SolrException e) {
             convertSolrExceptionAndThrow(e);
         }

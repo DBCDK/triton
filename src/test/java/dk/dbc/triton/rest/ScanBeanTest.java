@@ -37,6 +37,7 @@ class ScanBeanTest {
     private static final String INCLUDE = "include";
     private static final ScanPos POS = ScanPos.FIRST;
     private static final int SIZE = 20;
+    private static final boolean WITH_EXACT_FREQUENCY = true;
 
     private SolrClientFactoryBean solrClientFactoryBean = mock(SolrClientFactoryBean.class);
     private CloudSolrClient cloudSolrClient = mock(CloudSolrClient.class);
@@ -65,12 +66,14 @@ class ScanBeanTest {
     @Test
     void scan_termParamIsMandatory() {
         WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(null, INDEX, COLLECTION, POS, SIZE, INCLUDE), "term is null");
+                scanBean.scan(null, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "term is null");
         assertThat("term is null => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
 
         e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(" ", INDEX, COLLECTION, POS, SIZE, INCLUDE), "term is empty");
+                scanBean.scan(" ", INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "term is empty");
         assertThat("term is empty => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
@@ -78,12 +81,14 @@ class ScanBeanTest {
     @Test
     void scan_indexParamIsMandatory() {
         WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, null, COLLECTION, POS, SIZE, INCLUDE), "index is null");
+                scanBean.scan(TERM, null, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "index is null");
         assertThat("index is null => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
 
         e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, " ", COLLECTION, POS, SIZE, INCLUDE), "term is empty");
+                scanBean.scan(TERM, " ", COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "term is empty");
         assertThat("index is empty => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
@@ -91,12 +96,14 @@ class ScanBeanTest {
     @Test
     void scan_collectionParamIsMandatory() {
         WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, null, POS, SIZE, INCLUDE), "collection is null");
+                scanBean.scan(TERM, INDEX, null, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "collection is null");
         assertThat("collection is null => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
 
         e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, " ", POS, SIZE, INCLUDE), "collection is empty");
+                scanBean.scan(TERM, INDEX, " ", POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "collection is empty");
         assertThat("collection is empty => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
@@ -108,7 +115,8 @@ class ScanBeanTest {
         doThrow(new SolrException(SolrException.ErrorCode.NOT_FOUND, "Collection not found"))
                 .when(solrScan).execute();
         final WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE), "collection not found");
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "collection not found");
         assertThat("collection not found => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
@@ -119,7 +127,7 @@ class ScanBeanTest {
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
         assertThat("scan",
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE).getStatus(),
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
         verify(solrScan).withField(INDEX);
@@ -129,7 +137,7 @@ class ScanBeanTest {
         verify(solrScan).withRegex(INCLUDE);
 
         assertThat("scan pos=last",
-                scanBean.scan(TERM, INDEX, COLLECTION, ScanPos.LAST, SIZE, INCLUDE).getStatus(),
+                scanBean.scan(TERM, INDEX, COLLECTION, ScanPos.LAST, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
         verify(solrScan).withUpper(TERM);
