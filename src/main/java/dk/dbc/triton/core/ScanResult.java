@@ -120,7 +120,7 @@ public class ScanResult {
 
     public static class Term {
         private final String value;
-        private final long frequency;
+        private long frequency;
 
         public static Term of(TermsResponse.Term solrTerm) {
             return new Term(solrTerm.getTerm(), solrTerm.getFrequency());
@@ -137,6 +137,10 @@ public class ScanResult {
 
         public long getFrequency() {
             return frequency;
+        }
+
+        public void setFrequency(long frequency) {
+            this.frequency = frequency;
         }
 
         @Override
