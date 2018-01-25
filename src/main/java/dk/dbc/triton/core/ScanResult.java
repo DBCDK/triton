@@ -126,7 +126,7 @@ public class ScanResult {
             return new Term(solrTerm.getTerm(), solrTerm.getFrequency());
         }
 
-        Term(String value, long frequency) {
+        public Term(String value, long frequency) {
             this.value = value;
             this.frequency = frequency;
         }
@@ -160,6 +160,14 @@ public class ScanResult {
         public int hashCode() {
 
             return Objects.hash(value, frequency);
+        }
+
+        @Override
+        public String toString() {
+            return "Term{" +
+                    "value='" + value + '\'' +
+                    ", frequency=" + frequency +
+                    '}';
         }
     }
 }

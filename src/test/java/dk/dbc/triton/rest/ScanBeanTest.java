@@ -7,7 +7,9 @@ package dk.dbc.triton.rest;
 
 import dk.dbc.solr.SolrScan;
 import dk.dbc.triton.core.ScanPos;
+import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanResultTest;
+import dk.dbc.triton.core.ScanTermAdjusterBean;
 import dk.dbc.triton.core.SolrClientFactoryBean;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -20,11 +22,14 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,20 +50,24 @@ class ScanBeanTest {
     private CloudSolrClient cloudSolrClient = mock(CloudSolrClient.class);
     private SolrScan solrScan = mock(SolrScan.class);
     private TermsResponse termsResponse = ScanResultTest.createTermsResponse(INDEX);
+    private ScanTermAdjusterBean scanTermAdjusterBean = mock(ScanTermAdjusterBean.class);
+    private Future<ScanResult.Term> future = mock(Future.class);
 
     private ScanBean scanBean = createScanBean();
 
     @BeforeEach
     void setupExpectations() {
-        when(solrClientFactoryBean.getCloudSolrClient()).thenReturn(cloudSolrClient);
-        when(solrScan.withField(INDEX)).thenReturn(solrScan);
-        when(solrScan.withLimit(SIZE)).thenReturn(solrScan);
-        when(solrScan.withLower(TERM)).thenReturn(solrScan);
-        when(solrScan.withLowerInclusive(true)).thenReturn(solrScan);
-        when(solrScan.withUpper(TERM)).thenReturn(solrScan);
-        when(solrScan.withUpperInclusive(true)).thenReturn(solrScan);
-        when(solrScan.withRegex(INCLUDE)).thenReturn(solrScan);
         try {
+            when(solrClientFactoryBean.getCloudSolrClient()).thenReturn(cloudSolrClient);
+            when(scanTermAdjusterBean.adjustTermFrequency(eq(COLLECTION), eq(INDEX), any(ScanResult.Term.class)))
+                    .thenReturn(null);
+            when(solrScan.withField(INDEX)).thenReturn(solrScan);
+            when(solrScan.withLimit(SIZE)).thenReturn(solrScan);
+            when(solrScan.withLower(TERM)).thenReturn(solrScan);
+            when(solrScan.withLowerInclusive(true)).thenReturn(solrScan);
+            when(solrScan.withUpper(TERM)).thenReturn(solrScan);
+            when(solrScan.withUpperInclusive(true)).thenReturn(solrScan);
+            when(solrScan.withRegex(INCLUDE)).thenReturn(solrScan);
             when(solrScan.execute()).thenReturn(termsResponse);
         } catch (IOException | SolrServerException e) {
             throw new IllegalStateException(e);
@@ -146,9 +155,29 @@ class ScanBeanTest {
         verify(solrScan).withUpperInclusive(true);
     }
 
+    @Test
+    void scanWithExactFrequency() throws IOException, SolrServerException, InterruptedException, ExecutionException, TimeoutException {
+        when(scanTermAdjusterBean.adjustTermFrequency(eq(COLLECTION), eq(INDEX), any(ScanResult.Term.class)))
+                .thenReturn(future);
+        final ScanBean scanBean = spy(createScanBean());
+        doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
+
+        assertThat("scan",
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, true).getStatus(),
+                is(Response.Status.OK.getStatusCode()));
+
+        verify(scanTermAdjusterBean).adjustTermFrequency(COLLECTION, INDEX,
+                new ScanResult.Term("a", 1));
+        verify(scanTermAdjusterBean).adjustTermFrequency(COLLECTION, INDEX,
+                new ScanResult.Term("b", 2));
+        verify(scanTermAdjusterBean).adjustTermFrequency(COLLECTION, INDEX,
+                new ScanResult.Term("c", 3));
+    }
+
     private ScanBean createScanBean() {
         final ScanBean scanBean = new ScanBean();
         scanBean.solrClientFactoryBean = solrClientFactoryBean;
+        scanBean.scanTermAdjusterBean = scanTermAdjusterBean;
         return scanBean;
     }
 }
