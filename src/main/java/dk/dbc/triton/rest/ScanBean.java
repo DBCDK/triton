@@ -10,6 +10,7 @@ import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanTermAdjusterBean;
 import dk.dbc.triton.core.SolrClientFactoryBean;
+import dk.dbc.triton.core.TritonException;
 import dk.dbc.util.Stopwatch;
 import dk.dbc.util.Timed;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -58,8 +59,7 @@ public class ScanBean {
      * @return 200 Ok response containing serialized {@link ScanResult}.
      *         400 Bad Request on null or empty term, index or collection param.
      *         400 Bad Request on non-existing collection.
-     * @throws IOException on internal communication error
-     * @throws SolrServerException on internal solr error
+     * @throws TritonException on internal error
      * @throws WebApplicationException on bad request
      */
     @GET
@@ -73,7 +73,7 @@ public class ScanBean {
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("include") @DefaultValue("") String include,
             @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency)
-            throws IOException, SolrServerException, WebApplicationException, InterruptedException, ExecutionException, TimeoutException {
+            throws TritonException, WebApplicationException {
         verifyStringParam("term", term);
         verifyStringParam("index", index);
         verifyStringParam("collection", collection);
@@ -98,6 +98,8 @@ public class ScanBean {
             }
         } catch (SolrException e) {
             convertSolrExceptionAndThrow(e);
+        } catch (IOException | SolrServerException e) {
+            throw new TritonException(e);
         }
         return Response.ok(scanResult).build();
     }
@@ -110,7 +112,7 @@ public class ScanBean {
     }
 
     private void adjustTermFrequencies(String collection, String index, ScanResult scanResult)
-            throws IOException, SolrServerException, InterruptedException, ExecutionException, TimeoutException {
+            throws TritonException {
         final Stopwatch stopwatch = new Stopwatch();
         try {
             final List<ScanResult.Term> terms = scanResult.getTerms();
@@ -121,6 +123,8 @@ public class ScanBean {
             for (Future<ScanResult.Term> future : futures) {
                 future.get(10, TimeUnit.SECONDS);
             }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new TritonException(e);
         } finally {
             LOGGER.info("adjustTermFrequencies took {} {}",
                     stopwatch.getElapsedTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
@@ -139,7 +143,7 @@ public class ScanBean {
     }
 
     private void convertSolrExceptionAndThrow(SolrException e)
-            throws SolrException, WebApplicationException {
+            throws TritonException, WebApplicationException {
         if (!e.getMessage().isEmpty()
                 && e.getMessage().toLowerCase().startsWith("collection not found")) {
             throw new WebApplicationException(
@@ -148,6 +152,6 @@ public class ScanBean {
                             .build()
             );
         }
-        throw e;
+        throw new TritonException(e);
     }
 }

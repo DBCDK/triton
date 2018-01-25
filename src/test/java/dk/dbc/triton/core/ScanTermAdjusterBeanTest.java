@@ -49,7 +49,7 @@ class ScanTermAdjusterBeanTest {
     }
 
     @Test
-    void updatesTerm() throws IOException, SolrServerException, ExecutionException, InterruptedException {
+    void updatesTerm() throws ExecutionException, InterruptedException {
         final ScanTermAdjusterBean scanTermAdjusterBean = spy(createScanTermAdjusterBean());
         doReturn(solrSearch).when(scanTermAdjusterBean).createSolrSearch(cloudSolrClient, COLLECTION);
 
@@ -61,7 +61,7 @@ class ScanTermAdjusterBeanTest {
     }
 
     @Test
-    void exactMatchSearch() throws IOException, SolrServerException {
+    void exactMatchSearch() {
         final ScanTermAdjusterBean scanTermAdjusterBean = spy(createScanTermAdjusterBean());
         doReturn(solrSearch).when(scanTermAdjusterBean).createSolrSearch(cloudSolrClient, COLLECTION);
 

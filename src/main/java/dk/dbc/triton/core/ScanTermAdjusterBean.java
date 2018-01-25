@@ -30,23 +30,26 @@ public class ScanTermAdjusterBean {
      * @param term scan term
      * @return {@link Future} containing the updated term to signal
      * completion of asynchronous operation
-     * @throws IOException on internal communication error
-     * @throws SolrServerException on internal solr error
+     * @throws TritonException on internal error
      */
     @Asynchronous
     public Future<ScanResult.Term> adjustTermFrequency(String collection, String index, ScanResult.Term term)
-            throws IOException, SolrServerException {
-        final String query = String.format("%s:\"%s\"", index, ClientUtils.escapeQueryChars(term.getValue()));
-        final QueryResponse response = createSolrSearch(solrClientFactoryBean.getCloudSolrClient(), collection)
-                .withQuery(query)
-                .execute();
-        // Updating the term in-place is slightly dangerous since
-        // ScanResult.Term is not thread-safe. A more functional
-        // approach would be to return a copy of the original term,
-        // but this would force the caller to re-sort the terms,
-        // which for performance reasons is not desirable,
-        term.setFrequency(response.getResults().getNumFound());
-        return new AsyncResult<>(term);
+            throws TritonException {
+        try {
+            final String query = String.format("%s:\"%s\"", index, ClientUtils.escapeQueryChars(term.getValue()));
+            final QueryResponse response = createSolrSearch(solrClientFactoryBean.getCloudSolrClient(), collection)
+                    .withQuery(query)
+                    .execute();
+            // Updating the term in-place is slightly dangerous since
+            // ScanResult.Term is not thread-safe. A more functional
+            // approach would be to return a copy of the original term,
+            // but this would force the caller to re-sort the terms,
+            // which for performance reasons is not desirable,
+            term.setFrequency(response.getResults().getNumFound());
+            return new AsyncResult<>(term);
+        } catch (IOException | SolrServerException e) {
+            throw new TritonException(e);
+        }
     }
 
     // This method exists for easy partial mocking of solr

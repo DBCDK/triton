@@ -21,9 +21,7 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -133,7 +131,7 @@ class ScanBeanTest {
     }
 
     @Test
-    void scan() throws IOException, SolrServerException, InterruptedException, ExecutionException, TimeoutException {
+    void scan() {
         final ScanBean scanBean = spy(createScanBean());
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
@@ -156,7 +154,7 @@ class ScanBeanTest {
     }
 
     @Test
-    void scanWithExactFrequency() throws IOException, SolrServerException, InterruptedException, ExecutionException, TimeoutException {
+    void scanWithExactFrequency() {
         when(scanTermAdjusterBean.adjustTermFrequency(eq(COLLECTION), eq(INDEX), any(ScanResult.Term.class)))
                 .thenReturn(future);
         final ScanBean scanBean = spy(createScanBean());
