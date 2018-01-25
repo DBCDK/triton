@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +39,7 @@ class ScanBeanTest {
     private static final String INCLUDE = "include";
     private static final ScanPos POS = ScanPos.FIRST;
     private static final int SIZE = 20;
-    private static final boolean WITH_EXACT_FREQUENCY = true;
+    private static final boolean WITH_EXACT_FREQUENCY = false;
 
     private SolrClientFactoryBean solrClientFactoryBean = mock(SolrClientFactoryBean.class);
     private CloudSolrClient cloudSolrClient = mock(CloudSolrClient.class);
@@ -122,7 +124,7 @@ class ScanBeanTest {
     }
 
     @Test
-    void scan() throws IOException, SolrServerException {
+    void scan() throws IOException, SolrServerException, InterruptedException, ExecutionException, TimeoutException {
         final ScanBean scanBean = spy(createScanBean());
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
