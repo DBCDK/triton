@@ -23,6 +23,7 @@
     <hamcrest.version>1.3</hamcrest.version>
     <jackson.version>2.9.2</jackson.version>
     <javaee.api.version>7.0</javaee.api.version>
+    <microprofile.version>1.2</microprofile.version>
     <jdk.target.version>1.8</jdk.target.version>
     <jersey.version>2.22.2</jersey.version>
     <junit.version>5.0.2</junit.version>
@@ -50,6 +51,12 @@
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
       <version>${javaee.api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-api</artifactId>
+      <version>${microprofile.version}</version> <!-- version 1.2 available since Payara v4.1.2.181 -->
       <scope>provided</scope>
     </dependency>
     <dependency>
