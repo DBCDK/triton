@@ -9,21 +9,25 @@ import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
 
 import static javax.ejb.LockType.READ;
 
+@Startup
 @Singleton
 public class SolrClientFactoryBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(SolrClientFactoryBean.class);
 
-    @Resource(lookup = "java:app/env/url/zookeeper")
+    @Inject
+    @ConfigProperty(name = "ZOOKEEPER", defaultValue = "ZOOKEEPER environment variable not set")
     private String zookeeper;
 
     private CloudSolrClient cloudSolrClient;
