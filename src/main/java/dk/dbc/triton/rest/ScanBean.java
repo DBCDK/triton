@@ -49,7 +49,8 @@ public class ScanBean {
      * Scans database index for a term or a phrase
      * @param term index term
      * @param index index field
-     * @param collection solr collection
+     * @param collectionParam solr collection, defaults to value of
+     *                        environment variable DEFAULT_COLLECTION
      * @param pos preferred term position {first|last}, defaults to first
      * @param size maximum number of entries to be return, defaults to 20
      * @param include restricts to terms matching the regular expression
@@ -57,7 +58,7 @@ public class ScanBean {
      *                           term to adjust term frequencies,
      *                           defaults to true
      * @return 200 Ok response containing serialized {@link ScanResult}.
-     *         400 Bad Request on null or empty term, index or collection param.
+     *         400 Bad Request on null or empty term or index param.
      *         400 Bad Request on non-existing collection.
      * @throws TritonException on internal error
      * @throws WebApplicationException on bad request
@@ -68,7 +69,7 @@ public class ScanBean {
     public Response scan(
             @QueryParam("term") String term,
             @QueryParam("index") String index,
-            @QueryParam("collection") String collection,
+            @QueryParam("collection") String collectionParam,
             @QueryParam("pos") @DefaultValue("first") ScanPos pos,
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("include") @DefaultValue("") String include,
@@ -76,7 +77,8 @@ public class ScanBean {
             throws TritonException, WebApplicationException {
         verifyStringParam("term", term);
         verifyStringParam("index", index);
-        verifyStringParam("collection", collection);
+        final String collection = collectionParam != null && !collectionParam.trim().isEmpty() ?
+                collectionParam : solrClientFactoryBean.getDefaultCollection();
         ScanResult scanResult = null;
         try {
             final CloudSolrClient cloudSolrClient = solrClientFactoryBean.getCloudSolrClient();
