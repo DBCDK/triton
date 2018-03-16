@@ -84,7 +84,8 @@ public class SolrClientFactoryBean {
                     throw new TritonException(String.format(
                             "Unable to ping collection %s", defaultCollection));
                 }
-                LOGGER.info("Pinged solr collection {} in {} ms", pingResponse.getQTime());
+                LOGGER.info("Pinged solr collection {} in {} ms",
+                        defaultCollection, pingResponse.getQTime());
             } catch (SolrServerException | IOException e) {
                 throw new TritonException(String.format(
                         "Unable to ping collection %s", defaultCollection), e);
