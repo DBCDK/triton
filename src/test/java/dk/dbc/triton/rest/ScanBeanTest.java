@@ -103,21 +103,6 @@ class ScanBeanTest {
     }
 
     @Test
-    void scan_collectionParamIsMandatory() {
-        WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, null, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
-                "collection is null");
-        assertThat("collection is null => Bad Request",
-                e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-
-        e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, " ", POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
-                "collection is empty");
-        assertThat("collection is empty => Bad Request",
-                e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-    }
-
-    @Test
     void scan_collectionNotFound() throws IOException, SolrServerException {
         final ScanBean scanBean = spy(createScanBean());
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
