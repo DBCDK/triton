@@ -6,6 +6,7 @@
 package dk.dbc.triton.rest;
 
 import dk.dbc.solr.SolrScan;
+import dk.dbc.solr.SolrSearch;
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanTermAdjusterBean;
@@ -94,6 +95,9 @@ public class ScanBean {
                 solrScan.withRegex(include);
             }
             scanResult = ScanResult.of(solrScan.execute());
+            if (scanResult.getTerms().isEmpty()) {
+                verifyIndex(cloudSolrClient, collection, scanResult.getIndex());
+            }
 
             if (withExactFrequency) {
                 adjustTermFrequencies(collection, index, scanResult);
@@ -111,6 +115,12 @@ public class ScanBean {
     SolrScan createSolrScan(CloudSolrClient cloudSolrClient, String collection) {
         return new SolrScan(cloudSolrClient, collection)
                 .withSort(SolrScan.SortType.INDEX);
+    }
+
+    // This method exists for easy partial mocking of solr
+    // functionality during testing
+    SolrSearch createSolrSearch(CloudSolrClient cloudSolrClient, String collection) {
+        return new SolrSearch(cloudSolrClient, collection);
     }
 
     private void adjustTermFrequencies(String collection, String index, ScanResult scanResult)
@@ -144,15 +154,24 @@ public class ScanBean {
         }
     }
 
+    private void verifyIndex(CloudSolrClient cloudSolrClient, String collection, String index)
+            throws IOException, SolrServerException {
+        /* Since a solr terms request does not report an error
+           in case of an unknown index, we do a simple search
+           instead. */
+        createSolrSearch(cloudSolrClient, collection)
+                .withQuery(index + ":test")
+                .withRows(0)
+                .execute();
+    }
+
     private void convertSolrExceptionAndThrow(SolrException e)
             throws TritonException, WebApplicationException {
-        if (!e.getMessage().isEmpty()
-                && e.getMessage().toLowerCase().startsWith("collection not found")) {
+        if (e.code() == 400) {
             throw new WebApplicationException(
                     Response.status(Response.Status.BAD_REQUEST)
                             .entity(e.getMessage())
-                            .build()
-            );
+                            .build());
         }
         throw new TritonException(e);
     }
