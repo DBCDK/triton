@@ -6,6 +6,7 @@
 package dk.dbc.triton.rest;
 
 import dk.dbc.solr.SolrScan;
+import dk.dbc.solr.SolrSearch;
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanResultTest;
@@ -27,6 +28,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -106,12 +108,34 @@ class ScanBeanTest {
     void scan_collectionNotFound() throws IOException, SolrServerException {
         final ScanBean scanBean = spy(createScanBean());
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
-        doThrow(new SolrException(SolrException.ErrorCode.NOT_FOUND, "Collection not found"))
+        doThrow(new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Collection not found"))
                 .when(solrScan).execute();
         final WebApplicationException e = assertThrows(WebApplicationException.class, () ->
                 scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
                 "collection not found");
         assertThat("collection not found => Bad Request",
+                e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
+    void scan_indexNotFound() throws IOException, SolrServerException {
+        final ScanBean scanBean = spy(createScanBean());
+        doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
+        final TermsResponse termsResponse = ScanResultTest.createTermsResponse(INDEX);
+        termsResponse.getTermMap().clear();
+        when(solrScan.execute()).thenReturn(termsResponse);
+
+        final SolrSearch solrSearch = mock(SolrSearch.class);
+        doReturn(solrSearch).when(scanBean).createSolrSearch(cloudSolrClient, COLLECTION);
+        when(solrSearch.withQuery(anyString())).thenReturn(solrSearch);
+        when(solrSearch.withRows(0)).thenReturn(solrSearch);
+        doThrow(new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Index not found"))
+                .when(solrSearch).execute();
+
+        final WebApplicationException e = assertThrows(WebApplicationException.class, () ->
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                "Index not found");
+        assertThat("Index not found => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
     }
 
