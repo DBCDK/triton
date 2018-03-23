@@ -7,6 +7,7 @@ package dk.dbc.triton.rest;
 
 import dk.dbc.solr.SolrScan;
 import dk.dbc.solr.SolrSearch;
+import dk.dbc.triton.core.ScanMapBeanTest;
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanResultTest;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 class ScanBeanTest {
     private static final String TERM = "term";
-    private static final String INDEX = "index";
+    private static final String INDEX = "scan.mti";
     private static final String COLLECTION = "collection";
     private static final String INCLUDE = "include";
     private static final ScanPos POS = ScanPos.FIRST;
@@ -163,7 +164,19 @@ class ScanBeanTest {
     }
 
     @Test
-    void scanWithExactFrequency() {
+    void scan_withIndexAlias() {
+        final ScanBean scanBean = spy(createScanBean());
+        doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
+
+        assertThat("scan",
+                scanBean.scan(TERM, "mti", COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
+                is(Response.Status.OK.getStatusCode()));
+
+        verify(solrScan).withField(INDEX);
+    }
+
+    @Test
+    void scan_withExactFrequency() {
         when(scanTermAdjusterBean.adjustTermFrequency(eq(COLLECTION), eq(INDEX), any(ScanResult.Term.class)))
                 .thenReturn(future);
         final ScanBean scanBean = spy(createScanBean());
@@ -185,6 +198,7 @@ class ScanBeanTest {
         final ScanBean scanBean = new ScanBean();
         scanBean.solrClientFactoryBean = solrClientFactoryBean;
         scanBean.scanTermAdjusterBean = scanTermAdjusterBean;
+        scanBean.scanMapBean = ScanMapBeanTest.newScanMapBean();
         return scanBean;
     }
 }

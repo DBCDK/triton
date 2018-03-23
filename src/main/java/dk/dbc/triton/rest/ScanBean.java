@@ -7,6 +7,7 @@ package dk.dbc.triton.rest;
 
 import dk.dbc.solr.SolrScan;
 import dk.dbc.solr.SolrSearch;
+import dk.dbc.triton.core.ScanMapBean;
 import dk.dbc.triton.core.ScanPos;
 import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanTermAdjusterBean;
@@ -45,11 +46,12 @@ public class ScanBean {
 
     @EJB SolrClientFactoryBean solrClientFactoryBean;
     @EJB ScanTermAdjusterBean scanTermAdjusterBean;
+    @EJB ScanMapBean scanMapBean;
 
     /**
      * Scans database index for a term or a phrase
      * @param term index term
-     * @param index index field
+     * @param indexParam index field
      * @param collectionParam solr collection, defaults to value of
      *                        environment variable DEFAULT_COLLECTION
      * @param pos preferred term position {first|last}, defaults to first
@@ -69,7 +71,7 @@ public class ScanBean {
     @Timed
     public Response scan(
             @QueryParam("term") String term,
-            @QueryParam("index") String index,
+            @QueryParam("index") String indexParam,
             @QueryParam("collection") String collectionParam,
             @QueryParam("pos") @DefaultValue("first") ScanPos pos,
             @QueryParam("size") @DefaultValue("20") int size,
@@ -77,12 +79,13 @@ public class ScanBean {
             @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency)
             throws TritonException, WebApplicationException {
         verifyStringParam("term", term);
-        verifyStringParam("index", index);
+        verifyStringParam("index", indexParam);
         final String collection = collectionParam != null && !collectionParam.trim().isEmpty() ?
                 collectionParam : solrClientFactoryBean.getDefaultCollection();
         ScanResult scanResult = null;
         try {
             final CloudSolrClient cloudSolrClient = solrClientFactoryBean.getCloudSolrClient();
+            final String index = scanMapBean.resolve(collection, indexParam);
             final SolrScan solrScan = createSolrScan(cloudSolrClient, collection)
                     .withField(index)
                     .withLimit(size);

@@ -12,7 +12,7 @@ import java.util.Properties;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-class ScanMapBeanTest {
+public class ScanMapBeanTest {
     private final ScanMapBean scanMapBean = newScanMapBean();
 
     @Test
@@ -33,7 +33,7 @@ class ScanMapBeanTest {
                 is("scan.mti"));
     }
 
-    private static ScanMapBean newScanMapBean() {
+    public static ScanMapBean newScanMapBean() {
         final ScanMapBean scanMapBean = new ScanMapBean();
         scanMapBean.collectionProperties.put("collection", new Properties());
         scanMapBean.collectionProperties.get("collection").put("mti", "scan.mti");
