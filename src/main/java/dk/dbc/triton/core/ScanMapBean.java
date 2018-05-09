@@ -33,8 +33,8 @@ import static javax.ejb.LockType.READ;
  * Resolves scan index names from aliases
  * <p>
  * Loads map (if present) for each collection in the cluster at startup from
- * the file /configs/{configName}/scanMap.properties in the zookeeper. The
- * content of scanMap.properties must be a well-formed Java property file
+ * the file /configs/{configName}/scanMap.txt in the zookeeper. The
+ * content of scanMap.txt must be a well-formed Java property file
  * (precise semantics described here:
  * https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-)
  * </p>
@@ -44,7 +44,7 @@ import static javax.ejb.LockType.READ;
 @DependsOn("SolrClientFactoryBean")
 public class ScanMapBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScanMapBean.class);
-    private static final String SCAN_MAP_FILE = "scanMap.properties";
+    private static final String SCAN_MAP_FILE = "scanMap.txt";
 
     @EJB SolrClientFactoryBean solrClientFactoryBean;
 
