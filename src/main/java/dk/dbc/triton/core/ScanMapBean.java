@@ -5,10 +5,10 @@
 
 package dk.dbc.triton.core;
 
-import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
-import org.apache.solr.common.SolrException;
+import org.apache.solr.common.cloud.DocCollection;
+import org.apache.solr.common.cloud.Replica;
+import org.apache.solr.common.cloud.Slice;
 import org.apache.solr.common.cloud.ZkStateReader;
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +18,15 @@ import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import static javax.ejb.LockType.READ;
@@ -52,18 +54,33 @@ public class ScanMapBean {
 
     @PostConstruct
     public void initialize() {
-        Path tempDir = null;
-        try {
-            tempDir = Files.createTempDirectory("triton");
-
-            final ZkStateReader clusterStateReader = solrClientFactoryBean.getCloudSolrClient().getZkStateReader();
-            for (String collection : clusterStateReader.getClusterState().getCollectionsMap().keySet()) {
-                collectionProperties.put(collection, fetchScanMap(collection, tempDir));
+        final ZkStateReader clusterStateReader = solrClientFactoryBean.getCloudSolrClient().getZkStateReader();
+        final List<String> scanMapUrls = new ArrayList<>();
+        for (String collection : clusterStateReader.getClusterState().getCollectionsMap().keySet()) {
+            final Optional<String> scanMapUrl = getScanMapUrl(collection);
+            if (scanMapUrl.isPresent()) {
+                final Optional<Properties> scanMap = fetchScanMap(scanMapUrl.get());
+                if (scanMap.isPresent()) {
+                    collectionProperties.put(collection, scanMap.get());
+                    LOGGER.info("Fetched {} for {}", SCAN_MAP_FILE, collection);
+                    scanMapUrls.add(scanMapUrl.get());
+                }
             }
-        } catch (IOException e) {
-            throw new TritonException(e);
-        } finally {
-            deleteDirectory(tempDir);
+        }
+
+        // The default collection might be a collection alias,
+        // so try and fetch the scan map using the known URLs
+        // replacing the collection path part by the default
+        // collection name.
+        for (String scanMapUrl : scanMapUrls) {
+            scanMapUrl = scanMapUrl.replaceFirst("/solr/.*/admin/",
+                    "/solr/" + solrClientFactoryBean.getDefaultCollection() + "/admin/");
+            final Optional<Properties> scanMap = fetchScanMap(scanMapUrl);
+            if (scanMap.isPresent()) {
+                collectionProperties.put(solrClientFactoryBean.getDefaultCollection(), scanMap.get());
+                LOGGER.info("Fetched {} for {}", SCAN_MAP_FILE, solrClientFactoryBean.getDefaultCollection());
+                break;
+            }
         }
     }
 
@@ -81,43 +98,40 @@ public class ScanMapBean {
         return collectionProperties.get(collection).getProperty(indexAlias, indexAlias);
     }
 
-    private void deleteDirectory(Path dir) {
-        if (dir != null) {
-            try {
-                Files.walk(dir)
-                        .sorted(Comparator.reverseOrder()) // ensures containing dir after files
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                LOGGER.error("Error deleting dir {}", dir.toAbsolutePath());
-            }
-        }
-    }
-
-    private Properties fetchScanMap(String collection, Path tempDir) {
-        final Properties properties = new Properties();
-        try {
-            final ZkStateReader clusterStateReader = solrClientFactoryBean.getCloudSolrClient().getZkStateReader();
-            final String configName = clusterStateReader.readConfigName(collection);
-
-            final ZkClientClusterStateProvider clusterStateProvider = (ZkClientClusterStateProvider)
-                    solrClientFactoryBean.getCloudSolrClient().getClusterStateProvider();
-            final Path localDir = tempDir.resolve(collection);
-            clusterStateProvider.downloadConfig(configName, localDir);
-
-            final Path scanMapFile = localDir.resolve(SCAN_MAP_FILE);
-            if (Files.exists(scanMapFile)) {
-                try (InputStream inputStream = Files.newInputStream(scanMapFile)) {
-                    properties.load(inputStream);
+    /* Returns the scan map URL for the given collection
+       or empty if no shard URL could be determined */
+    private Optional<String> getScanMapUrl(String collection) {
+        final ZkStateReader zkStateReader = solrClientFactoryBean.getCloudSolrClient()
+                .getZkStateReader();
+        final DocCollection docCollection = zkStateReader.getClusterState()
+                .getCollectionOrNull(collection);
+        if (docCollection != null) {
+            for (Slice slice : docCollection.getSlices()) {
+                for (Replica replica : slice.getReplicas()) {
+                    if (replica.getState() == Replica.State.ACTIVE) {
+                        return Optional.of(replica.getCoreUrl()
+                                + "admin/file?wt=json&file=scanMap.txt&contentType=text%2Fplain%3Bcharset%3Dutf-8");
+                    }
                 }
             }
-        } catch (SolrException | IOException e) {
-            if (e.getCause() == null
-                    || !(e.getCause() instanceof KeeperException.NoNodeException)) {
-                throw new TritonException(e);
-            }
-            LOGGER.info("No config found for collection {}", collection);
         }
-        return properties;
+        return Optional.empty();
+    }
+
+    /* Returns scan map located at given URL
+       or empty if no scan map could be found */
+    private Optional<Properties> fetchScanMap(String url) {
+        try {
+            final URLConnection urlConnection = new URL(url).openConnection();
+            try (InputStream inputStream = urlConnection.getInputStream()) {
+                final Properties properties = new Properties();
+                properties.load(inputStream);
+                return Optional.of(properties);
+            }
+        } catch (FileNotFoundException e) {
+            return Optional.empty();
+        } catch (IOException e) {
+            throw new TritonException(e);
+        }
     }
 }
