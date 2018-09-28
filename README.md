@@ -71,7 +71,8 @@ Environment variables:
           "value": "testing #241 (bogpla)",
           "frequency": 1
         }
-     }
+      ]  
+    }
     ```
 
 * **Sample Call:**
