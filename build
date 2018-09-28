@@ -1,0 +1,14 @@
+case "$1" in
+    docker)
+        echo "### building triton docker ###"
+        docker build . -t triton || exit 1
+        ;;
+
+    *)
+        echo "### building triton project ###"
+        echo "### Look for build artifacts in target/ ###"
+
+        mvn package -Dmaven.test.skip=true || exit 1
+        ;;
+esac
+

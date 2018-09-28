@@ -1,0 +1,3 @@
+echo "### Stopping triton docker ###"
+
+docker stop triton || exit 1
