@@ -1,0 +1,6 @@
+echo "### cleaning triton project ###"
+
+mvn clean
+git pull --ff-only
+docker rm -f triton &>/dev/null || true
+exit 0
