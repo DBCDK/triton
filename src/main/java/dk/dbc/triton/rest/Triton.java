@@ -19,7 +19,7 @@ import java.util.Set;
  */
 @ApplicationPath("/")
 public class Triton extends Application {
-    public static final Set<Class<?>> classes = new HashSet<>();
+    static final Set<Class<?>> classes = new HashSet<>();
     static {
         classes.add(JacksonFeature.class);
         classes.add(JacksonXMLProvider.class);
