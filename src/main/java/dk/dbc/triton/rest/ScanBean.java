@@ -69,6 +69,7 @@ public class ScanBean {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Timed
+    @AccessLogged
     public Response scan(
             @QueryParam("term") String term,
             @QueryParam("index") String indexParam,
