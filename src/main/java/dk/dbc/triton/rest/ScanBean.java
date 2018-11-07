@@ -60,6 +60,8 @@ public class ScanBean {
      * @param withExactFrequency perform exact match search for each scan
      *                           term to adjust term frequencies,
      *                           defaults to true
+     * @param fieldType normalize input term before scan using analysis
+     *                  phases defined by this field type
      * @return 200 Ok response containing serialized {@link ScanResult}.
      *         400 Bad Request on null or empty term or index param.
      *         400 Bad Request on non-existing collection.
@@ -77,7 +79,8 @@ public class ScanBean {
             @QueryParam("pos") @DefaultValue("first") ScanPos pos,
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("include") @DefaultValue("") String include,
-            @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency)
+            @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency,
+            @QueryParam("fieldType") @DefaultValue("dbc-phrase") String fieldType)
             throws TritonException, WebApplicationException {
         verifyStringParam("term", term);
         verifyStringParam("index", indexParam);
@@ -87,6 +90,7 @@ public class ScanBean {
         try {
             final CloudSolrClient cloudSolrClient = solrClientFactoryBean.getCloudSolrClient();
             final String index = scanMapBean.resolve(collection, indexParam);
+            term = normalizeTermByFieldType(collection, fieldType, term);
             final SolrScan solrScan = createSolrScan(cloudSolrClient, collection)
                     .withField(index)
                     .withLimit(size);
@@ -125,6 +129,16 @@ public class ScanBean {
     // functionality during testing
     SolrSearch createSolrSearch(CloudSolrClient cloudSolrClient, String collection) {
         return new SolrSearch(cloudSolrClient, collection);
+    }
+
+    private String normalizeTermByFieldType(String collection, String fieldType, String term) {
+        final Stopwatch stopwatch = new Stopwatch();
+        try {
+            return scanTermAdjusterBean.normalizeByFieldType(collection, fieldType, term);
+        } finally {
+            LOGGER.info("normalizeTermByFieldType took {} {}",
+                    stopwatch.getElapsedTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
+        }
     }
 
     private void adjustTermFrequencies(String collection, String index, ScanResult scanResult)

@@ -39,13 +39,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ScanBeanTest {
-    private static final String TERM = "term";
+    private static final String TERM = "TeRm";
+    private static final String TERM_NORMALIZED = "term";
     private static final String INDEX = "scan.mti";
     private static final String COLLECTION = "collection";
     private static final String INCLUDE = "include";
     private static final ScanPos POS = ScanPos.FIRST;
     private static final int SIZE = 20;
-    private static final boolean WITH_EXACT_FREQUENCY = false;
+    private static final boolean WITHOUT_EXACT_FREQUENCY = false;
+    private static final String FIELD_TYPE = "dbc-phrase";
 
     private SolrClientFactoryBean solrClientFactoryBean = mock(SolrClientFactoryBean.class);
     private CloudSolrClient cloudSolrClient = mock(CloudSolrClient.class);
@@ -62,11 +64,13 @@ class ScanBeanTest {
             when(solrClientFactoryBean.getCloudSolrClient()).thenReturn(cloudSolrClient);
             when(scanTermAdjusterBean.adjustTermFrequency(eq(COLLECTION), eq(INDEX), any(ScanResult.Term.class)))
                     .thenReturn(null);
+            when(scanTermAdjusterBean.normalizeByFieldType(COLLECTION, FIELD_TYPE, TERM))
+                    .thenReturn(TERM_NORMALIZED);
             when(solrScan.withField(INDEX)).thenReturn(solrScan);
             when(solrScan.withLimit(SIZE)).thenReturn(solrScan);
-            when(solrScan.withLower(TERM)).thenReturn(solrScan);
+            when(solrScan.withLower(TERM_NORMALIZED)).thenReturn(solrScan);
             when(solrScan.withLowerInclusive(true)).thenReturn(solrScan);
-            when(solrScan.withUpper(TERM)).thenReturn(solrScan);
+            when(solrScan.withUpper(TERM_NORMALIZED)).thenReturn(solrScan);
             when(solrScan.withUpperInclusive(true)).thenReturn(solrScan);
             when(solrScan.withRegex(INCLUDE)).thenReturn(solrScan);
             when(solrScan.execute()).thenReturn(termsResponse);
@@ -78,13 +82,15 @@ class ScanBeanTest {
     @Test
     void scan_termParamIsMandatory() {
         WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(null, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(null, INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "term is null");
         assertThat("term is null => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
 
         e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(" ", INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(" ", INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "term is empty");
         assertThat("term is empty => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
@@ -93,13 +99,15 @@ class ScanBeanTest {
     @Test
     void scan_indexParamIsMandatory() {
         WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, null, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(TERM, null, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "index is null");
         assertThat("index is null => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
 
         e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, " ", COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(TERM, " ", COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "term is empty");
         assertThat("index is empty => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
@@ -112,7 +120,8 @@ class ScanBeanTest {
         doThrow(new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Collection not found"))
                 .when(solrScan).execute();
         final WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "collection not found");
         assertThat("collection not found => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
@@ -134,7 +143,8 @@ class ScanBeanTest {
                 .when(solrSearch).execute();
 
         final WebApplicationException e = assertThrows(WebApplicationException.class, () ->
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY),
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE),
                 "Index not found");
         assertThat("Index not found => Bad Request",
                 e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
@@ -146,20 +156,22 @@ class ScanBeanTest {
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
         assertThat("scan",
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
         verify(solrScan).withField(INDEX);
         verify(solrScan).withLimit(SIZE);
-        verify(solrScan).withLower(TERM);
+        verify(solrScan).withLower(TERM_NORMALIZED);
         verify(solrScan).withLowerInclusive(true);
         verify(solrScan).withRegex(INCLUDE);
 
         assertThat("scan pos=last",
-                scanBean.scan(TERM, INDEX, COLLECTION, ScanPos.LAST, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
+                scanBean.scan(TERM, INDEX, COLLECTION, ScanPos.LAST, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
-        verify(solrScan).withUpper(TERM);
+        verify(solrScan).withUpper(TERM_NORMALIZED);
         verify(solrScan).withUpperInclusive(true);
     }
 
@@ -169,7 +181,8 @@ class ScanBeanTest {
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
         assertThat("scan",
-                scanBean.scan(TERM, "mti", COLLECTION, POS, SIZE, INCLUDE, WITH_EXACT_FREQUENCY).getStatus(),
+                scanBean.scan(TERM, "mti", COLLECTION, POS, SIZE, INCLUDE,
+                        WITHOUT_EXACT_FREQUENCY, FIELD_TYPE).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
         verify(solrScan).withField(INDEX);
@@ -183,7 +196,8 @@ class ScanBeanTest {
         doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
 
         assertThat("scan",
-                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, true).getStatus(),
+                scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE,
+                        true, FIELD_TYPE).getStatus(),
                 is(Response.Status.OK.getStatusCode()));
 
         verify(scanTermAdjusterBean).adjustTermFrequency(COLLECTION, INDEX,
@@ -192,6 +206,16 @@ class ScanBeanTest {
                 new ScanResult.Term("b", 2));
         verify(scanTermAdjusterBean).adjustTermFrequency(COLLECTION, INDEX,
                 new ScanResult.Term("c", 3));
+    }
+
+    @Test
+    void scan_normalizeTermByFieldType() {
+        final ScanBean scanBean = spy(createScanBean());
+        doReturn(solrScan).when(scanBean).createSolrScan(cloudSolrClient, COLLECTION);
+
+        scanBean.scan(TERM, INDEX, COLLECTION, POS, SIZE, INCLUDE, WITHOUT_EXACT_FREQUENCY, FIELD_TYPE);
+
+        verify(scanTermAdjusterBean).normalizeByFieldType(COLLECTION, FIELD_TYPE, TERM);
     }
 
     private ScanBean createScanBean() {
