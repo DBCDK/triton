@@ -42,6 +42,8 @@ Environment variables:
     
     `withExactFrequency` perform exact match search for each scan term to adjust term frequencies, defaults to true.
    
+    `fieldType` normalize input term before scan using analysis phases defined by this field type, defaults to dbc-phrase.
+    
   
 * **Success Response:**
 
