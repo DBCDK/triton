@@ -5,10 +5,25 @@ webservice for index scans in dbckat
 
 ### configuration
 
-Environment variables:
+**Environment variables**
 
 * ZOOKEEPER mandatory variable pointing to the zookeeper quorum for the Solr cloud instance.
 * DEFAULT_COLLECTION optional variable naming the default Solr collection
+
+**Scan aliases**
+
+Scan index name aliases can be placed in a /configs/{collectionName}/scanMap.txt file on the Solr server.
+
+The content of scanMap.txt must be a well-formed Java property file (precise semantics described here: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-), with key as the alias and value as the actual index name.
+
+The following entry for example
+
+  ```text
+  mti scan.mti
+  ```
+
+entails that &index=mti and &index=scan.mti can be used interchangeably in scan requests.
+
 
 ### API ###
 
