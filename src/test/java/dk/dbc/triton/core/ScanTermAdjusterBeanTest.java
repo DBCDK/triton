@@ -5,6 +5,7 @@
 
 package dk.dbc.triton.core;
 
+import dk.dbc.solr.SolrFieldAnalysis;
 import dk.dbc.solr.SolrSearch;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -30,10 +31,12 @@ import static org.mockito.Mockito.when;
 class ScanTermAdjusterBeanTest {
     private static final String INDEX = "index";
     private static final String COLLECTION = "collection";
+    private static final String FIELD_TYPE = "dbc-phrase";
 
     private SolrClientFactoryBean solrClientFactoryBean = mock(SolrClientFactoryBean.class);
     private CloudSolrClient cloudSolrClient = mock(CloudSolrClient.class);
     private SolrSearch solrSearch = mock(SolrSearch.class);
+    private SolrFieldAnalysis solrFieldAnalysis = mock(SolrFieldAnalysis.class);
 
     private final QueryResponse queryResponse = createQueryResponse();
 
@@ -69,6 +72,28 @@ class ScanTermAdjusterBeanTest {
         scanTermAdjusterBean.adjustTermFrequency(COLLECTION, INDEX, term);
 
         verify(solrSearch).withQuery("index:\"\\{value\\}\"");
+    }
+
+    @Test
+    void normalizeByFieldType() throws SolrServerException {
+        final ScanTermAdjusterBean scanTermAdjusterBean = spy(createScanTermAdjusterBean());
+        doReturn(solrFieldAnalysis).when(scanTermAdjusterBean).createSolrFieldAnalysis(cloudSolrClient, COLLECTION);
+
+        when(solrFieldAnalysis.byFieldType(FIELD_TYPE, "Test Phrase"))
+                .thenReturn("test phrase");
+        assertThat("Test Phrase", scanTermAdjusterBean.normalizeByFieldType(
+                COLLECTION, FIELD_TYPE, "Test Phrase"), is("test phrase"));
+        assertThat("Test Phrase (bog)", scanTermAdjusterBean.normalizeByFieldType(
+                COLLECTION, FIELD_TYPE, "Test Phrase (bog)"), is("test phrase (bog)"));
+        assertThat("Test Phrase #245a", scanTermAdjusterBean.normalizeByFieldType(
+                COLLECTION, FIELD_TYPE, "Test Phrase #245a"), is("test phrase #245a"));
+        assertThat("Test Phrase #245a (bog)", scanTermAdjusterBean.normalizeByFieldType(
+                COLLECTION, FIELD_TYPE, "Test Phrase #245a (bog)"), is("test phrase #245a (bog)"));
+        when(solrFieldAnalysis.byFieldType(FIELD_TYPE, "Test Phrase #hashtag (something)"))
+                .thenReturn("test phrase hashtag something");
+        assertThat("Test Phrase #hashtag (something) #245a (bog)", scanTermAdjusterBean.normalizeByFieldType(
+                COLLECTION, FIELD_TYPE, "Test Phrase #hashtag (something) #245a (bog)"),
+                is("test phrase hashtag something #245a (bog)"));
     }
 
     private ScanTermAdjusterBean createScanTermAdjusterBean() {
