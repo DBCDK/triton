@@ -80,7 +80,7 @@ public class ScanBean {
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("include") @DefaultValue("") String include,
             @QueryParam("withExactFrequency") @DefaultValue("true") boolean withExactFrequency,
-            @QueryParam("fieldType") @DefaultValue("dbc-phrase") String fieldType)
+            @QueryParam("fieldType") @DefaultValue("dbc-scan") String fieldType)
             throws TritonException, WebApplicationException {
         verifyStringParam("term", term);
         verifyStringParam("index", indexParam);
