@@ -53,7 +53,8 @@ pipeline {
 		stage("docker build") {
 			steps {
 				script {
-					def image = docker.build("docker-io.dbc.dk/triton-service:${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+					def image = docker.build("docker-io.dbc.dk/triton-service:${env.BRANCH_NAME}-${env.BUILD_NUMBER}",
+						"--pull --no-cache .")
 					image.push()
 				}
 			}
