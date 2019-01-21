@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-micro:10
+FROM docker.dbc.dk/payara5-micro:latest
 
 ENV USER gfish
 USER $USER
