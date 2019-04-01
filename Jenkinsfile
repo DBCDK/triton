@@ -9,7 +9,8 @@ pipeline {
 		maven "Maven 3"
 	}
 	environment {
-		MARATHON_TOKEN = credentials("METASCRUM_MARATHON_TOKEN")
+		DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+		GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
 	}
 	triggers {
 		pollSCM("H/03 * * * *")
@@ -53,9 +54,29 @@ pipeline {
 		stage("docker build") {
 			steps {
 				script {
-					def image = docker.build("docker-io.dbc.dk/triton-service:${env.BRANCH_NAME}-${env.BUILD_NUMBER}",
+					def image = docker.build("docker-io.dbc.dk/triton-service:${env.DOCKER_TAG}",
 						"--pull --no-cache .")
 					image.push()
+				}
+			}
+		}
+		stage("update staging version") {
+			agent {
+				docker {
+					label workerNode
+					image "docker.dbc.dk/gitops-deploy-env"
+					alwaysPull true
+				}
+			}
+			when {
+				branch "autodeploy-staging"
+			}
+			steps {
+				dir("deploy") {
+					git(url: "gitlab@gitlab.dbc.dk:metascrum/triton-deploy.git", credentialsId: "gitlab-meta", branch: "staging")
+					sh """
+						set-new-version triton-dbckat-service.yml ${env.GITLAB_PRIVATE_TOKEN} 143 ${env.DOCKER_TAG} -b staging
+					"""
 				}
 			}
 		}
