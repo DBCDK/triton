@@ -69,7 +69,7 @@ pipeline {
 				}
 			}
 			when {
-				branch "autodeploy-staging"
+				branch "master"
 			}
 			steps {
 				dir("deploy") {
