@@ -73,7 +73,8 @@ pipeline {
 			}
 			steps {
 				dir("deploy") {
-					git(url: "gitlab@gitlab.dbc.dk:metascrum/triton-deploy.git", credentialsId: "gitlab-meta", branch: "staging")
+					git(url: "gitlab@gitlab.dbc.dk:metascrum/triton-deploy.git", credentialsId: "gitlab-meta",
+						branch: "staging", poll: false)
 					sh """
 						set-new-version triton-dbckat-service.yml ${env.GITLAB_PRIVATE_TOKEN} 143 ${env.DOCKER_TAG} -b staging
 					"""
