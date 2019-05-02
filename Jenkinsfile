@@ -13,7 +13,8 @@ pipeline {
 		GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
 	}
 	triggers {
-		pollSCM("H/03 * * * *")
+		upstream(upstreamProjects: "Docker-payara5-bump-trigger",
+			threshold: hudson.model.Result.SUCCESS)
 	}
 	options {
 		timestamps()
