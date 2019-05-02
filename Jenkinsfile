@@ -1,6 +1,6 @@
 #!groovy
 
-def workerNode = "devel8"
+def workerNode = "devel9"
 
 pipeline {
 	agent {label workerNode}
@@ -9,10 +9,12 @@ pipeline {
 		maven "Maven 3"
 	}
 	environment {
-		MARATHON_TOKEN = credentials("METASCRUM_MARATHON_TOKEN")
+		DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+		GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
 	}
 	triggers {
-		pollSCM("H/03 * * * *")
+		upstream(upstreamProjects: "Docker-payara5-bump-trigger",
+			threshold: hudson.model.Result.SUCCESS)
 	}
 	options {
 		timestamps()
@@ -53,9 +55,28 @@ pipeline {
 		stage("docker build") {
 			steps {
 				script {
-					def image = docker.build("docker-io.dbc.dk/triton-service:${env.BRANCH_NAME}-${env.BUILD_NUMBER}",
+					def image = docker.build("docker-io.dbc.dk/triton-service:${env.DOCKER_TAG}",
 						"--pull --no-cache .")
 					image.push()
+				}
+			}
+		}
+		stage("update staging version") {
+			agent {
+				docker {
+					label workerNode
+					image "docker.dbc.dk/build-env"
+					alwaysPull true
+				}
+			}
+			when {
+				branch "master"
+			}
+			steps {
+				dir("deploy") {
+					sh """
+						set-new-version triton-dbckat-service.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/triton-deploy ${env.DOCKER_TAG} -b staging
+					"""
 				}
 			}
 		}
