@@ -5,6 +5,7 @@
 
 package dk.dbc.triton.core;
 
+import org.apache.solr.common.cloud.Aliases;
 import org.apache.solr.common.cloud.DocCollection;
 import org.apache.solr.common.cloud.Replica;
 import org.apache.solr.common.cloud.Slice;
@@ -23,9 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -50,12 +50,14 @@ public class ScanMapBean {
 
     @EJB SolrClientFactoryBean solrClientFactoryBean;
 
-    HashMap<String, Properties> collectionProperties = new HashMap<>();
+    Map<String, Properties> collectionProperties = new HashMap<>();
 
     @PostConstruct
     public void initialize() {
         final ZkStateReader clusterStateReader = solrClientFactoryBean.getCloudSolrClient().getZkStateReader();
-        final List<String> scanMapUrls = new ArrayList<>();
+        final Aliases aliases = clusterStateReader.getAliases();
+        final Map<String, String> collectionAliasMap = aliases.getCollectionAliasMap();
+        LOGGER.info("Known aliases: {}", collectionAliasMap);
         for (String collection : clusterStateReader.getClusterState().getCollectionsMap().keySet()) {
             final Optional<String> scanMapUrl = getScanMapUrl(collection);
             if (scanMapUrl.isPresent()) {
@@ -63,23 +65,13 @@ public class ScanMapBean {
                 if (scanMap.isPresent()) {
                     collectionProperties.put(collection, scanMap.get());
                     LOGGER.info("Fetched {} for {}", SCAN_MAP_FILE, collection);
-                    scanMapUrls.add(scanMapUrl.get());
+                    collectionAliasMap.forEach((alias, name) -> {
+                        if (collection.equals(name)) {
+                            collectionProperties.put(alias, scanMap.get());
+                            LOGGER.info("Stored {} for alias {} as copy of {}", SCAN_MAP_FILE, alias, collection);
+                        }
+                    });
                 }
-            }
-        }
-
-        // The default collection might be a collection alias,
-        // so try and fetch the scan map using the known URLs
-        // replacing the collection path part by the default
-        // collection name.
-        for (String scanMapUrl : scanMapUrls) {
-            scanMapUrl = scanMapUrl.replaceFirst("/solr/.*/admin/",
-                    "/solr/" + solrClientFactoryBean.getDefaultCollection() + "/admin/");
-            final Optional<Properties> scanMap = fetchScanMap(scanMapUrl);
-            if (scanMap.isPresent()) {
-                collectionProperties.put(solrClientFactoryBean.getDefaultCollection(), scanMap.get());
-                LOGGER.info("Fetched {} for {}", SCAN_MAP_FILE, solrClientFactoryBean.getDefaultCollection());
-                break;
             }
         }
     }
