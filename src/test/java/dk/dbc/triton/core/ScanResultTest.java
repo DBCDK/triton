@@ -26,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScanResultTest {
     public static TermsResponse createTermsResponse(String... indexes) {
-        final NamedList<Number> indexTerms = new NamedList<>();
+        final NamedList<Object> indexTerms = new NamedList<>();
         indexTerms.add("a", 1);
         indexTerms.add("b", 2);
         indexTerms.add("c", 3);
-        final NamedList<NamedList<Number>> list = new NamedList<>();
+        final NamedList<NamedList<Object>> list = new NamedList<>();
         for (String index : indexes) {
             list.add(index, indexTerms);
         }

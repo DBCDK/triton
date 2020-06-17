@@ -29,7 +29,7 @@
   <properties>
     <maven.surefire.version>2.19</maven.surefire.version>
     <serviceutils.version>0.1-SNAPSHOT</serviceutils.version>
-    <solr-api.version>1.0-SNAPSHOT</solr-api.version>
+    <solr-api.version>1.1-SNAPSHOT</solr-api.version>
   </properties>
 
   <dependencies>
