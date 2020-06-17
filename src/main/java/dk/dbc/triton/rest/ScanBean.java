@@ -89,6 +89,9 @@ public class ScanBean {
         ScanResult scanResult = null;
         try {
             final CloudSolrClient cloudSolrClient = solrClientFactoryBean.getCloudSolrClient();
+            if (LOGGER.isDebugEnabled()) {
+                solrClientFactoryBean.logLiveReplicas(collection);
+            }
             final String index = scanMapBean.resolve(collection, indexParam);
             term = normalizeTermByFieldType(collection, fieldType, term);
             final SolrScan solrScan = createSolrScan(cloudSolrClient, collection)
