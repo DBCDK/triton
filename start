@@ -4,7 +4,7 @@
 echo "### Starting triton docker ###"
 
 triton_port=${TRITON_PORT:-8080}
-docker run --rm --name triton -d -e ZOOKEEPER=${ZOOKEEPER} -e DEFAULT_COLLECTION=${DEFAULT_COLLECTION} -p ${triton_port}:8080 triton
+docker run --rm --name triton -d -e ZOOKEEPER=${ZOOKEEPER} -e DEFAULT_COLLECTION=${DEFAULT_COLLECTION} -e JAVA_MAX_HEAP_SIZE=2G -e LOG_FORMAT=text -p ${triton_port}:8080 triton
 
 attempts=0
 max_attempts=60
