@@ -5,6 +5,7 @@
 
 package dk.dbc.triton.core;
 
+import dk.dbc.solr.ZkParams;
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -45,9 +46,9 @@ public class SolrClientFactoryBean {
     @PostConstruct
     public void initialize() {
         LOGGER.info("Zookeeper quorum: {}", zookeeper);
-        cloudSolrClient = new CloudSolrClient.Builder()
+        final ZkParams zkParams = ZkParams.create(zookeeper);
+        cloudSolrClient = new CloudSolrClient.Builder(zkParams.getZkHosts(), zkParams.getZkChroot())
                 .withHttpClient(createHttpClient())
-                .withZkHost(zookeeper)
                 .build();
         cloudSolrClient.connect();
         pingDefaultCollection();
