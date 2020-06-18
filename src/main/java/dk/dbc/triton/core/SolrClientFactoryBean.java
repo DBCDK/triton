@@ -109,7 +109,8 @@ public class SolrClientFactoryBean {
         return HttpClientUtil.createClient(params);
     }
 
-    private void pingDefaultCollection() {
+    @Lock(READ)
+    public void pingDefaultCollection() {
         if (!DEFAULT_COLLECTION_NOT_CONFIGURED.equals(defaultCollection)) {
             try {
                 final SolrPing ping = new SolrPing();
