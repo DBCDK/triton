@@ -12,6 +12,12 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.common.cloud.ClusterState;
+import org.apache.solr.common.cloud.DocCollection;
+import org.apache.solr.common.cloud.Replica;
+import org.apache.solr.common.cloud.Slice;
+import org.apache.solr.common.cloud.ZkCoreNodeProps;
+import org.apache.solr.common.cloud.ZkStateReader;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -23,6 +29,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Set;
 
 import static javax.ejb.LockType.READ;
 
@@ -62,6 +69,34 @@ public class SolrClientFactoryBean {
     @Lock(READ)
     public String getDefaultCollection() {
         return defaultCollection;
+    }
+
+    @Lock(READ)
+    public void logLiveReplicas(String collection) {
+        final String collectionName = resolveCollectionAlias(collection);
+        final ZkStateReader zkStateReader = cloudSolrClient.getZkStateReader();
+        final ClusterState clusterState = zkStateReader.getClusterState();
+        final Set<String> liveNodes = clusterState.getLiveNodes();
+        final DocCollection docCollection = clusterState.getCollectionOrNull(collectionName);
+        if (docCollection != null) {
+            for (Slice slice : docCollection.getSlices()) {
+                for (Replica replica : slice.getReplicas()) {
+                    if (replica.getState() == Replica.State.ACTIVE && liveNodes.contains(replica.getNodeName())) {
+                        final ZkCoreNodeProps zkProps = new ZkCoreNodeProps(replica);
+                        LOGGER.info("{} live replica base URL: {}", collectionName, zkProps.getBaseUrl());
+                    }
+                }
+            }
+        }
+    }
+
+    @Lock(READ)
+    public String resolveCollectionAlias(String collection) {
+        final String resolvedName = cloudSolrClient.getClusterStateProvider().resolveAlias(collection).get(0);
+        if (!collection.equals(resolvedName)) {
+            LOGGER.info("Collection name {} is an alias for {}", collection, resolvedName);
+        }
+        return resolvedName;
     }
 
     private HttpClient createHttpClient() {
