@@ -20,6 +20,10 @@ import org.apache.solr.common.cloud.ZkCoreNodeProps;
 import org.apache.solr.common.cloud.ZkStateReader;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.Liveness;
+import org.eclipse.microprofile.health.Readiness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Set;
@@ -110,7 +115,7 @@ public class SolrClientFactoryBean {
     }
 
     @Lock(READ)
-    public void pingDefaultCollection() {
+    public boolean pingDefaultCollection() {
         if (!DEFAULT_COLLECTION_NOT_CONFIGURED.equals(defaultCollection)) {
             try {
                 final SolrPing ping = new SolrPing();
@@ -122,10 +127,27 @@ public class SolrClientFactoryBean {
                 }
                 LOGGER.info("Pinged solr collection {} in {} ms",
                         defaultCollection, pingResponse.getQTime());
+
+                return true;
             } catch (SolrServerException | IOException e) {
                 throw new TritonException(String.format(
                         "Unable to ping collection %s", defaultCollection), e);
             }
         }
+        return false;
+    }
+
+    @Produces
+    @Liveness
+    @Lock(READ)
+    public HealthCheck livenessPing() {
+        return () -> HealthCheckResponse.named("ping-solr").state(pingDefaultCollection()).build();
+    }
+
+    @Produces
+    @Readiness
+    @Lock(READ)
+    public HealthCheck readinessPing() {
+        return () -> HealthCheckResponse.named("ping-solr").state(pingDefaultCollection()).build();
     }
 }
