@@ -79,11 +79,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>dk.dbc</groupId>
-      <artifactId>serviceutils</artifactId>
-      <version>${serviceutils.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
