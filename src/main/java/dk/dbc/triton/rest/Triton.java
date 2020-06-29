@@ -24,7 +24,6 @@ public class Triton extends Application {
         classes.add(JacksonFeature.class);
         classes.add(JacksonXMLProvider.class);
         classes.add(ScanBean.class);
-        classes.add(StatusBean.class);
         classes.add(RequestLogger.class);
     }
 
