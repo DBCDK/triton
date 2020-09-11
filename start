@@ -21,5 +21,5 @@ done
 
 echo ""
 echo "### Status for triton service ###"
-curl -vs http://localhost:${triton_port}/triton/status
+curl -vs http://localhost:${triton_port}/health/ready
 echo ""
