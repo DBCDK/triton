@@ -29,8 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import java.io.IOException;
@@ -38,8 +37,7 @@ import java.util.Set;
 
 import static javax.ejb.LockType.READ;
 
-@Startup
-@Singleton
+@ApplicationScoped
 public class SolrClientFactoryBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(SolrClientFactoryBean.class);
     private static final String ZOOKEEPER_NOT_CONFIGURED = "ZOOKEEPER property not set";
@@ -66,17 +64,14 @@ public class SolrClientFactoryBean {
         pingDefaultCollection();
     }
 
-    @Lock(READ)
     public CloudSolrClient getCloudSolrClient() {
         return cloudSolrClient;
     }
 
-    @Lock(READ)
     public String getDefaultCollection() {
         return defaultCollection;
     }
 
-    @Lock(READ)
     public void logLiveReplicas(String collection) {
         final String collectionName = resolveCollectionAlias(collection);
         final ZkStateReader zkStateReader = cloudSolrClient.getZkStateReader();
@@ -95,7 +90,6 @@ public class SolrClientFactoryBean {
         }
     }
 
-    @Lock(READ)
     public String resolveCollectionAlias(String collection) {
         final String resolvedName = cloudSolrClient.getClusterStateProvider().resolveAlias(collection).get(0);
         if (!collection.equals(resolvedName)) {
@@ -114,7 +108,6 @@ public class SolrClientFactoryBean {
         return HttpClientUtil.createClient(params);
     }
 
-    @Lock(READ)
     public boolean pingDefaultCollection() {
         if (!DEFAULT_COLLECTION_NOT_CONFIGURED.equals(defaultCollection)) {
             try {
@@ -141,13 +134,13 @@ public class SolrClientFactoryBean {
     @Liveness
     @Lock(READ)
     public HealthCheck livenessPing() {
-        return () -> HealthCheckResponse.named("ping-solr").state(pingDefaultCollection()).build();
+        return () -> HealthCheckResponse.named("ping-solr").status(pingDefaultCollection()).build();
     }
 
     @Produces
     @Readiness
     @Lock(READ)
     public HealthCheck readinessPing() {
-        return () -> HealthCheckResponse.named("ping-solr").state(pingDefaultCollection()).build();
+        return () -> HealthCheckResponse.named("ping-solr").status(pingDefaultCollection()).build();
     }
 }

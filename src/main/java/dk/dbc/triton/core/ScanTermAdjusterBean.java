@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -39,7 +39,7 @@ public class ScanTermAdjusterBean {
     private static final Pattern scanTermPattern =
             Pattern.compile("(.*?)\\s*((?:#[\\p{Alnum}]+)?\\s*?(?:\\([\\p{Alnum}]+\\))?)$");
 
-    @EJB SolrClientFactoryBean solrClientFactoryBean;
+    @Inject SolrClientFactoryBean solrClientFactoryBean;
 
     /**
      * Updates frequency of the given {@link ScanResult.Term} by doing
