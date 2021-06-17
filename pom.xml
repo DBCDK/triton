@@ -15,7 +15,7 @@
   <parent>
     <groupId>dk.dbc</groupId>
     <artifactId>microservice-pom</artifactId>
-    <version>latest-SNAPSHOT</version>
+    <version>payara-ce-SNAPSHOT</version>
     <relativePath></relativePath>
   </parent>
 
@@ -48,9 +48,12 @@
       <artifactId>javaee-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.microprofile</groupId>
-      <artifactId>microprofile</artifactId>
-      <type>pom</type>
+      <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.microprofile.health</groupId>
+      <artifactId>microprofile-health-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>

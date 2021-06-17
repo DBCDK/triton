@@ -14,11 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,12 +42,11 @@ import static javax.ejb.LockType.READ;
  */
 @Startup
 @Singleton
-@DependsOn("SolrClientFactoryBean")
 public class ScanMapBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScanMapBean.class);
     private static final String SCAN_MAP_FILE = "scanMap.txt";
 
-    @EJB SolrClientFactoryBean solrClientFactoryBean;
+    @Inject SolrClientFactoryBean solrClientFactoryBean;
 
     Map<String, Properties> collectionProperties = new HashMap<>();
 

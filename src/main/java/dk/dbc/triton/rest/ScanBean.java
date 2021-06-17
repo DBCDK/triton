@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -44,7 +45,7 @@ import java.util.concurrent.TimeoutException;
 public class ScanBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScanBean.class);
 
-    @EJB SolrClientFactoryBean solrClientFactoryBean;
+    @Inject SolrClientFactoryBean solrClientFactoryBean;
     @EJB ScanTermAdjusterBean scanTermAdjusterBean;
     @EJB ScanMapBean scanMapBean;
 
