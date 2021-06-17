@@ -15,7 +15,7 @@
   <parent>
     <groupId>dk.dbc</groupId>
     <artifactId>microservice-pom</artifactId>
-    <version>master-SNAPSHOT</version>
+    <version>payara-ce-SNAPSHOT</version>
     <relativePath></relativePath>
   </parent>
 
@@ -31,18 +31,6 @@
     <serviceutils.version>0.1-SNAPSHOT</serviceutils.version>
     <solr-api.version>1.1-SNAPSHOT</solr-api.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.eclipse.microprofile</groupId>
-        <artifactId>microprofile</artifactId>
-        <type>pom</type>
-        <version>4.0</version>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -62,12 +50,10 @@
     <dependency>
       <groupId>org.eclipse.microprofile.config</groupId>
       <artifactId>microprofile-config-api</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.microprofile.health</groupId>
       <artifactId>microprofile-health-api</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
