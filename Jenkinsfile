@@ -55,8 +55,7 @@ pipeline {
 		stage("docker build") {
 			steps {
 				script {
-					def image = docker.build("docker-metascrum.artifacts.dbccloud.dk/triton-service:${env.DOCKER_TAG}",
-						"--no-cache .")
+					def image = docker.build("docker-metascrum.artifacts.dbccloud.dk/triton-service:${env.DOCKER_TAG}")
 					image.push()
 				}
 			}
