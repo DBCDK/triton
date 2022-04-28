@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-micro:payara-ce
+FROM docker-dbc.artifacts.dbccloud.dk
 
 ENV USER gfish
 USER $USER

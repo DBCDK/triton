@@ -55,7 +55,7 @@ pipeline {
 		stage("docker build") {
 			steps {
 				script {
-					def image = docker.build("docker-io.dbc.dk/triton-service:${env.DOCKER_TAG}",
+					def image = docker.build("docker-metascrum.artifacts.dbccloud.dk/triton-service:${env.DOCKER_TAG}",
 						"--pull --no-cache .")
 					image.push()
 				}
@@ -65,7 +65,7 @@ pipeline {
 			agent {
 				docker {
 					label workerNode
-					image "docker.dbc.dk/build-env"
+					image "docker-dbc.artifacts.dbccloud.dk/build-env"
 					alwaysPull true
 				}
 			}
