@@ -1,18 +1,13 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt
- */
-
 package dk.dbc.triton.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 @Produces({ MediaType.APPLICATION_JSON })

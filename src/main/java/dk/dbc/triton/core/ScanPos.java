@@ -1,8 +1,3 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt
- */
-
 package dk.dbc.triton.core;
 
 public enum ScanPos {

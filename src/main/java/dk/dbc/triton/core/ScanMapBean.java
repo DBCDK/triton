@@ -1,8 +1,3 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt
- */
-
 package dk.dbc.triton.core;
 
 import org.apache.solr.common.cloud.Aliases;
@@ -13,11 +8,11 @@ import org.apache.solr.common.cloud.ZkStateReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Lock;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Lock;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-import static javax.ejb.LockType.READ;
+import static jakarta.ejb.LockType.READ;
 
 /**
  * Resolves scan index names from aliases
