@@ -1,6 +1,11 @@
 package dk.dbc.triton.core;
 
 import dk.dbc.solr.ZkParams;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Lock;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -22,11 +27,6 @@ import org.eclipse.microprofile.health.Readiness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.ejb.Lock;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Set;
 
@@ -113,7 +113,7 @@ public class SolrClientFactoryBean {
                     throw new TritonException(String.format(
                             "Unable to ping collection %s", defaultCollection));
                 }
-                LOGGER.info("Pinged solr collection {} in {} ms",
+                LOGGER.debug("Pinged solr collection {} in {} ms",
                         defaultCollection, pingResponse.getQTime());
 
                 return true;
