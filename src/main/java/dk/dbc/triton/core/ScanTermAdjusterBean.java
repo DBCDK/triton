@@ -1,8 +1,3 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt
- */
-
 package dk.dbc.triton.core;
 
 import dk.dbc.solr.SolrFieldAnalysis;
@@ -14,10 +9,10 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.AsyncResult;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;

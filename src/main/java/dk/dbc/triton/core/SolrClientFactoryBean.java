@@ -1,8 +1,3 @@
-/*
- * Copyright Dansk Bibliotekscenter a/s. Licensed under GPLv3
- * See license text in LICENSE.txt
- */
-
 package dk.dbc.triton.core;
 
 import dk.dbc.solr.ZkParams;
@@ -27,15 +22,15 @@ import org.eclipse.microprofile.health.Readiness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Lock;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Lock;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Set;
 
-import static javax.ejb.LockType.READ;
+import static jakarta.ejb.LockType.READ;
 
 @ApplicationScoped
 public class SolrClientFactoryBean {
