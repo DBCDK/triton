@@ -4,7 +4,4 @@
        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
        bean-discovery-mode="all"
        version="4.0">
-  <interceptors>
-    <class>dk.dbc.util.StopwatchInterceptor</class>
-  </interceptors>
 </beans>

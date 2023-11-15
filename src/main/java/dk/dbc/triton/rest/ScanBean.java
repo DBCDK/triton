@@ -13,14 +13,6 @@ import dk.dbc.triton.core.ScanResult;
 import dk.dbc.triton.core.ScanTermAdjusterBean;
 import dk.dbc.triton.core.SolrClientFactoryBean;
 import dk.dbc.triton.core.TritonException;
-import dk.dbc.util.Stopwatch;
-import dk.dbc.util.Timed;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.common.SolrException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -32,6 +24,12 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.common.SolrException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +69,6 @@ public class ScanBean {
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Timed
     @AccessLogged
     public Response scan(
             @QueryParam("term") String term,
@@ -137,18 +134,11 @@ public class ScanBean {
     }
 
     private String normalizeTermByFieldType(String collection, String fieldType, String term) {
-        final Stopwatch stopwatch = new Stopwatch();
-        try {
-            return scanTermAdjusterBean.normalizeByFieldType(collection, fieldType, term);
-        } finally {
-            LOGGER.info("normalizeTermByFieldType took {} {}",
-                    stopwatch.getElapsedTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
-        }
+        return scanTermAdjusterBean.normalizeByFieldType(collection, fieldType, term);
     }
 
     private void adjustTermFrequencies(String collection, String index, ScanResult scanResult)
             throws TritonException {
-        final Stopwatch stopwatch = new Stopwatch();
         try {
             final List<ScanResult.Term> terms = scanResult.getTerms();
             final List<Future<ScanResult.Term>> futures = new ArrayList<>(terms.size());
@@ -160,9 +150,6 @@ public class ScanBean {
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new TritonException(e);
-        } finally {
-            LOGGER.info("adjustTermFrequencies took {} {}",
-                    stopwatch.getElapsedTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
         }
     }
 
