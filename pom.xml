@@ -9,20 +9,20 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.dbc.triton</groupId>
     <artifactId>triton</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>war</packaging>
 
     <parent>
         <groupId>dk.dbc</groupId>
         <artifactId>microservice-pom</artifactId>
-        <version>java11-SNAPSHOT</version>
+        <version>java17-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <repositories>
         <repository>
             <id>mavenrepo.dbc.dk</id>
-            <url>https://mavenrepo.dbc.dk/content/groups/public/</url>
+            <url>https://mavenrepo.dbc.dk/nexus/content/groups/public/</url>
         </repository>
     </repositories>
 
